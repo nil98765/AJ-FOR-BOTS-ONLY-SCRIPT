@@ -71,6 +71,7 @@ local function findTarget(model)
     return nil
 end
 
+-- MODIFIED: Now prefers servers with 4-5 players.
 local function serverHop()
     local url = "https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"
     local success, data = pcall(function()
@@ -82,12 +83,26 @@ local function serverHop()
         return
     end
 
+    -- First, try to find a server with the ideal player count (4-5 players)
     for _, s in ipairs(data.data) do
-        if s.playing < s.maxPlayers and s.id ~= game.JobId then
+        if s.playing >= 4 and s.playing <= 5 and s.playing < s.maxPlayers and s.id ~= game.JobId then
+            print("Found ideal server with " .. s.playing .. " players. Teleporting...")
             TeleportService:TeleportToPlaceInstance(game.PlaceId, s.id, Players.LocalPlayer)
-            break
+            return -- Exit the function after initiating teleport
         end
     end
+
+    -- If no ideal server was found, fall back to joining any non-full server
+    print("No ideal servers found. Joining any available server...")
+    for _, s in ipairs(data.data) do
+        if s.playing < s.maxPlayers and s.id ~= game.JobId then
+            print("Found fallback server with " .. s.playing .. " players. Teleporting...")
+            TeleportService:TeleportToPlaceInstance(game.PlaceId, s.id, Players.LocalPlayer)
+            return -- Exit the function after initiating teleport
+        end
+    end
+
+    print("No other servers to hop to.")
 end
 
 while true do
