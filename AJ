@@ -147,7 +147,6 @@ task.spawn(function()
         end
     end
 
-    -- REMOVE ERROR GUI (unchanged)
     task.spawn(function()
         local CoreGui = game:GetService("CoreGui")
         while true do
@@ -187,20 +186,25 @@ task.spawn(function()
                 webhookURL = getFallbackWebhook()
             end
 
-            -- 🔗 JOIN LINK
             local joinLink = "https://chillihub1.github.io/chillihub-joiner/?placeId=" .. game.PlaceId .. "&gameInstanceId=" .. game.JobId
 
+            -- ONLY CHANGE IS BELOW (EMBED)
             local embed = {
                 title = string.format("1x %s ($%s/s)", best.Name, formatNumber(best.MPS)),
-                color = 0x5865F2,
+                color = 0x2B2D31,
                 fields = {
-                    {name="🧩 Pet", value=best.Name.." — "..best.GenRaw},
+                    {name="🌿 Pet", value=best.Name.." — "..best.GenRaw},
                     {name="🆔 Server ID", value="```"..game.JobId.."```"},
-                    {name="📜 Join Script", value='lua\ngame:GetService("TeleportService"):TeleportToPlaceInstance('..game.PlaceId..', "'..game.JobId..'", game.Players.LocalPlayer)'},
-                    {name="🔗 Join Link", value="```"..joinLink.."```"},
-                    {name="🤖 Bot", value="```"..Player and Player.Name or "Unknown).."```"},
-                    {name="👥 Players", value="```"..#Players:GetPlayers().."/"..Players.MaxPlayers.."```"},
-                    {name="🧱 Brainrots", value="```"..table.concat(lines,"\n").."```"},
+                    {
+                        name="📜 Join Script",
+                        value="```lua\n"
+                            .."game:GetService(\"TeleportService\"):TeleportToPlaceInstance("
+                            ..game.PlaceId..", \""..game.JobId.."\", game.Players.LocalPlayer)\n```"
+                    },
+                    {name="🔗 Join Link", value=joinLink},
+                    {name="🤖 Bot", value=(Player and Player.Name or "Unknown")},
+                    {name="👥 Players", value=#Players:GetPlayers().."/"..Players.MaxPlayers},
+                    {name="🧱 Brainrots", value="```"..table.concat(lines,"\n").."```"}
                 },
                 footer={text=os.date("%Y-%m-%d %H:%M")},
                 timestamp=os.date("!%Y-%m-%dT%H:%M:%SZ")
