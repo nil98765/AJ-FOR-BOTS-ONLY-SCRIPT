@@ -13,6 +13,7 @@ task.spawn(function()
         "https://discord.com/api/webhooks/...1",
         "https://discord.com/api/webhooks/...2"
     }
+
     local extraIndex = 1
     local WEBHOOK_COOLDOWN = 5
     local lastSent = {}
@@ -47,7 +48,7 @@ task.spawn(function()
 
     local function getFallbackWebhook()
         local url = EXTRA_WEBHOOKS[extraIndex]
-        extraIndex = extraIndex + 1
+        extraIndex += 1
         if extraIndex > #EXTRA_WEBHOOKS then extraIndex = 1 end
         return url
     end
@@ -65,7 +66,12 @@ task.spawn(function()
                     end
                     local req = getRequestFunction()
                     pcall(function()
-                        req({Url=item.Url, Method="POST", Headers={["Content-Type"]="application/json"}, Body=item.Payload})
+                        req({
+                            Url = item.Url,
+                            Method = "POST",
+                            Headers = {["Content-Type"] = "application/json"},
+                            Body = item.Payload
+                        })
                     end)
                     lastSent[item.Url] = os.clock()
                     task.wait(0.4)
@@ -78,7 +84,7 @@ task.spawn(function()
     local function formatNumber(num)
         local s = tostring(math.floor(num))
         while true do
-            local f,k = s:gsub("^(-?%d+)(%d%d%d)","%1,%2")
+            local f,k = s:gsub("^(-?%d+)(%d%d%d)", "%1,%2")
             s = f
             if k == 0 then break end
         end
@@ -113,7 +119,11 @@ task.spawn(function()
                             local genText = gen and (gen.Text or gen.Value) or "0"
                             local mps = parseMoney(genText)
                             if mps >= 1e6 then
-                                table.insert(list, {Name=displayName, MPS=mps, GenRaw=genText})
+                                table.insert(list, {
+                                    Name = displayName,
+                                    MPS = mps,
+                                    GenRaw = genText
+                                })
                             end
                         end
                     end
@@ -126,9 +136,16 @@ task.spawn(function()
 
     local function serverHop()
         local cursor = ""
-        for page = 1, 3 do
+        for _ = 1, 3 do
             local ok,data = pcall(function()
-                return HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?sortOrder=Asc&limit=100&cursor="..cursor))
+                return HttpService:JSONDecode(
+                    game:HttpGet(
+                        "https://games.roblox.com/v1/games/"..
+                        game.PlaceId..
+                        "/servers/Public?sortOrder=Asc&limit=100&cursor="..
+                        cursor
+                    )
+                )
             end)
             if ok and data and data.data then
                 for _, s in ipairs(data.data) do
@@ -136,14 +153,20 @@ task.spawn(function()
                         local free = s.maxPlayers - s.playing
                         if free >= 2 then
                             log("Hopping → "..s.id.." ("..s.playing.."/"..s.maxPlayers..")")
-                            QueueWebhook(getFallbackWebhook(), HttpService:JSONEncode({content="| Krypth at top | Notifier |"}))
-                            TeleportService:TeleportToPlaceInstance(game.PlaceId, s.id, Player)
+                            QueueWebhook(getFallbackWebhook(),
+                                HttpService:JSONEncode({content="| Krypth at top | Notifier |"})
+                            )
+                            TeleportService:TeleportToPlaceInstance(
+                                game.PlaceId,
+                                s.id,
+                                Player
+                            )
                             return
                         end
                     end
                 end
             end
-            if not(data and data.nextPageCursor) then break end
+            if not data.nextPageCursor then break end
             cursor = data.nextPageCursor
         end
     end
@@ -187,31 +210,41 @@ task.spawn(function()
                 webhookURL = getFallbackWebhook()
             end
 
-            local joinLink = "https://chillihub1.github.io/chillihub-joiner/?placeId=" .. game.PlaceId .. "&gameInstanceId=" .. game.JobId
+            local joinLink =
+                "https://chillihub1.github.io/chillihub-joiner/?placeId="..
+                game.PlaceId..
+                "&gameInstanceId="..
+                game.JobId
 
             local embed = {
-                title = string.format("1x %s ($%s/s)", best.Name, formatNumber(best.MPS)),
+                title = string.format(
+                    "1x %s ($%s/s)",
+                    best.Name,
+                    formatNumber(best.MPS)
+                ),
                 color = 0x2B2D31,
                 fields = {
-                    {name="🌿 Pet", value=best.Name.." — "..best.GenRaw},
-                    {name="🆔 Server ID", value="```"..game.JobId.."```"},
+                    { name="🌿 Pet", value="```"..best.Name.." — "..best.GenRaw.."```" },
+                    { name="🆔 Server ID", value="```"..game.JobId.."```" },
                     {
                         name="📜 Join Script",
-                        value="```lua\n"
-                            .."game:GetService(\"TeleportService\"):TeleportToPlaceInstance(" 
-                            ..game.PlaceId..", \""..game.JobId.."\", game.Players.LocalPlayer)\n```"
+                        value="```lua\n"..
+                              "game:GetService(\"TeleportService\"):TeleportToPlaceInstance("..
+                              game.PlaceId..", \""..game.JobId.."\", game.Players.LocalPlayer)\n```"
                     },
-                    {name="🔗 Join Link", value=joinLink},
-                    {name="🤖 Bot", value=(Player and Player.Name or "Unknown")},
-                    {name="👥 Players", value=#Players:GetPlayers().."/"..Players.MaxPlayers},
-                    {name="🧱 Brainrots", value="```"..table.concat(lines,"\n").."```"}
+                    { name="🔗 Join Link", value=joinLink },
+                    { name="🤖 Bot", value="```"..(Player and Player.Name or "Unknown").."```" },
+                    { name="👥 Players", value="```"..#Players:GetPlayers().."/"..Players.MaxPlayers.."```" },
+                    { name="🧱 Brainrots", value="```"..table.concat(lines, "\n").."```" }
                 },
-                footer={text=os.date("%Y-%m-%d %H:%M")},
-                timestamp=os.date("!%Y-%m-%dT%H:%M:%SZ")
+                footer = { text = os.date("%Y-%m-%d %H:%M") },
+                timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ")
             }
 
-            local payload = ping and HttpService:JSONEncode({content="@everyone", embeds={embed}})
-                                        or HttpService:JSONEncode({embeds={embed}})
+            local payload =
+                ping and HttpService:JSONEncode({content="@everyone", embeds={embed}})
+                or HttpService:JSONEncode({embeds={embed}})
+
             QueueWebhook(webhookURL, payload)
         end
 
