@@ -195,12 +195,12 @@ task.spawn(function()
                 color = 0x5865F2,
                 fields = {
                     {name="🧩 Pet", value=best.Name.." — "..best.GenRaw},
-                    {name="🆔 Server ID", value=game.JobId},
+                    {name="🆔 Server ID", value="```"..game.JobId.."```"},
                     {name="📜 Join Script", value='lua\ngame:GetService("TeleportService"):TeleportToPlaceInstance('..game.PlaceId..', "'..game.JobId..'", game.Players.LocalPlayer)'},
-                    {name="🔗 Join Link", value=joinLink},
-                    {name="🤖 Bot", value=Player and Player.Name or "Unknown"},
-                    {name="👥 Players", value=#Players:GetPlayers().."/"..Players.MaxPlayers},
-                    {name="🧱 Brainrots", value=table.concat(lines,"\n")}
+                    {name="🔗 Join Link", value="```"..joinLink.."```"},
+                    {name="🤖 Bot", value="```"..Player and Player.Name or "Unknown).."```"},
+                    {name="👥 Players", value="```"..#Players:GetPlayers().."/"..Players.MaxPlayers.."```"},
+                    {name="🧱 Brainrots", value="```"..table.concat(lines,"\n").."```"},
                 },
                 footer={text=os.date("%Y-%m-%d %H:%M")},
                 timestamp=os.date("!%Y-%m-%dT%H:%M:%SZ")
