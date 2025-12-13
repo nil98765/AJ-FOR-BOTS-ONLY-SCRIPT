@@ -47,7 +47,7 @@ task.spawn(function()
 
     local function getFallbackWebhook()
         local url = EXTRA_WEBHOOKS[extraIndex]
-        extraIndex += 1
+        extraIndex = extraIndex + 1
         if extraIndex > #EXTRA_WEBHOOKS then extraIndex = 1 end
         return url
     end
@@ -103,18 +103,19 @@ task.spawn(function()
             for _, obj in ipairs(plot:GetDescendants()) do
                 if obj.Name == "AnimalOverhead" then
                     local bb = obj.Parent
-                    if not bb then continue end
-                    local key = bb:GetFullName()
-                    if scanned[key] then continue end
-                    scanned[key] = true
-
-                    local display = obj:FindFirstChild("DisplayName")
-                    local gen = obj:FindFirstChild("Generation")
-                    local displayName = display and (display.Text or display.Value) or "Unknown"
-                    local genText = gen and (gen.Text or gen.Value) or "0"
-                    local mps = parseMoney(genText)
-                    if mps >= 1e6 then
-                        table.insert(list, {Name=displayName, MPS=mps, GenRaw=genText})
+                    if bb then
+                        local key = bb:GetFullName()
+                        if not scanned[key] then
+                            scanned[key] = true
+                            local display = obj:FindFirstChild("DisplayName")
+                            local gen = obj:FindFirstChild("Generation")
+                            local displayName = display and (display.Text or display.Value) or "Unknown"
+                            local genText = gen and (gen.Text or gen.Value) or "0"
+                            local mps = parseMoney(genText)
+                            if mps >= 1e6 then
+                                table.insert(list, {Name=displayName, MPS=mps, GenRaw=genText})
+                            end
+                        end
                     end
                 end
             end
@@ -188,7 +189,6 @@ task.spawn(function()
 
             local joinLink = "https://chillihub1.github.io/chillihub-joiner/?placeId=" .. game.PlaceId .. "&gameInstanceId=" .. game.JobId
 
-            -- ONLY CHANGE IS BELOW (EMBED)
             local embed = {
                 title = string.format("1x %s ($%s/s)", best.Name, formatNumber(best.MPS)),
                 color = 0x2B2D31,
@@ -198,7 +198,7 @@ task.spawn(function()
                     {
                         name="📜 Join Script",
                         value="```lua\n"
-                            .."game:GetService(\"TeleportService\"):TeleportToPlaceInstance("
+                            .."game:GetService(\"TeleportService\"):TeleportToPlaceInstance(" 
                             ..game.PlaceId..", \""..game.JobId.."\", game.Players.LocalPlayer)\n```"
                     },
                     {name="🔗 Join Link", value=joinLink},
